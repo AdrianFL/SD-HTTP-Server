@@ -10,11 +10,18 @@
 
 int s;
 
+void finalizar (int senyal){
+	printf("Recibida la señal de fin (cntr-C)\n\r");
+	close(s); /* cerrar para que accept termine con un error y salir del bucle principal */
+}
+
 int main(int argc, char *argv[]){
 	char *port_server="6000";
 	char *conf_file;
-	int i;
-	struct sockaddr_in server_addr;
+	int i, s2, proceso, n;
+	unsigned int long_client_addr;
+	struct sockaddr_in server_addr, client_addr;
+	char respuesta[1024];
 	
 	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
 	if (argc < 2){
@@ -40,8 +47,7 @@ int main(int argc, char *argv[]){
 	/**** Paso 1: Abrir el socket ****/
 
 	s = socket(AF_INET, SOCK_STREAM, 0); /* creo el socket */
-	if (s == -1)
-	{
+	if (s == -1){
 		fprintf(stderr, "Error. No se puede abrir el socket\n\r");
 		return 1;
 	}
@@ -52,8 +58,7 @@ int main(int argc, char *argv[]){
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(atoi(servidor_puerto));
 	server_addr.sin_addr.s_addr = INADDR_ANY; /* cualquier IP del servidor */
-	if (bind(s, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
-	{
+	if (bind(s, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1){
 		fprintf(stderr, "Error. No se puede asociar el puerto al servidor\n\r");
 		close(s);
 		return 1;
@@ -62,11 +67,41 @@ int main(int argc, char *argv[]){
 	
 	/**** Paso 3: Preparar el servidor para escuchar ****/
 
-	if (listen(s, 4) == -1) /*Solo vamos a escuchar 4 simultaneos? Deberiamos confirmar la cantidad*/
-	{
+	if (listen(s, 4) == -1){ /*Solo vamos a escuchar 4 simultaneos? Deberiamos confirmar la cantidad*/
 		fprintf(stderr, "Error preparando servidor\n\r");
 		close(s);
 		return 1;
 	}
 	printf("Socket preparado\n\r");
+	
+	/**** Paso 4: Esperar conexiones ****/
+
+	signal(SIGINT, finalizar);
+
+	while (1){
+		fprintf(stderr, "Esperando conexión en el puerto %s...\n\r", port_server);
+		long_client_addr = sizeof (client_addr); /* Por que lo declara aparte en lugar de hacer un sizeof directamente?*/
+		s2 = accept (s, (struct sockaddr *)&client_addr, &long_client_addr);
+		/* s2 es el socket para comunicarse con el cliente */
+		/* s puede seguir siendo usado para comunicarse con otros clientes */
+		if (s2 == -1)
+		{
+			break; /* salir del bucle */
+		}
+		/* crear un nuevo proceso para que se pueda atender varias peticiones en paralelo */
+		proceso = fork();
+		if (proceso == -1) exit(1);
+		if (proceso == 0){ /* soy el hijo */
+			close(s); /* el hijo no necesita el socket general */
+
+			/**** Paso 5: Leer el mensaje ****/
+
+			n = sizeof(mensaje);
+			recibidos = read(s2, mensaje, n);
+			/*A partir de aqui interpretamos la cabecera*/
+		}
+		else{ /* soy el padre */
+			close(s2); /* el padre no usa esta conexión */
+		}
+	}
 }
