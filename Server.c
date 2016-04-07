@@ -17,11 +17,14 @@ void finalizar (int senyal){
 
 int main(int argc, char *argv[]){
 	char *port_server="6000";
-	char *conf_file;
-	int i, s2, proceso, n;
+	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
+	char *method;
+	int i, s2, proceso, n, recibidos, max_clients=4;
 	unsigned int long_client_addr;
 	struct sockaddr_in server_addr, client_addr;
-	char respuesta[1024];
+	char respuesta[1024], mensaje[1024], parameter[200];
+	FILE *conf_file;
+	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
 	
 	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
 	if (argc < 2){
@@ -31,16 +34,30 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	
-	for(i=0; i<argc; i++){
+	for(i=1; i<argc; i++){
 		if(strcmp(argv[i],"-c")==0){ /*Faltan mas comprobaciones? */
 			i++;
 			if(i<argc){
-				conf_file=argv[i]; /*Puede que necesitemos strcpy*/
-				/*Tratamos aqui dentro el fichero de configuracion? Como?*/
+				conf_file=fopen(argv[i], "r");  /*Podemos crear un fichero de configuracion donde sea obligatorio pasar todos los parametros?*/
+				if(fgets(parameter, 200, conf_file)!=null){
+					strcpy(document_root, parameter);
+					if(fgets(parameter, 200, conf_file)!=null){
+						max_clients=atoi(parameter);
+						if(fgets(parameter, 200, conf_file)!=null){ /*Tiene sentido indicarlo aqui y por linea de comandos?*/
+							if(strcmp(argv[1], "-c")==0){
+								strcpy(port_server, parameter);
+							}
+							if(fgets(parameter, 200, conf_file)!=null){
+								strcpy(directoryIndex, parameter);
+							}
+						}
+					}
+				}
+				
 			}
 		}
 		else if(i==1){
-			port_server=atoi(argv[i]); /*Podriamos comprobar que sea >1024*/
+			strcpy(port_server, argv[i]); /*Podriamos comprobar que sea >1024*/
 		}
 	}
 	
@@ -56,7 +73,7 @@ int main(int argc, char *argv[]){
 	/**** Paso 2: Establecer la dirección (puerto) de escucha ****/
 
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(atoi(servidor_puerto));
+	server_addr.sin_port = htons(atoi(port_server));
 	server_addr.sin_addr.s_addr = INADDR_ANY; /* cualquier IP del servidor */
 	if (bind(s, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1){
 		fprintf(stderr, "Error. No se puede asociar el puerto al servidor\n\r");
@@ -67,7 +84,7 @@ int main(int argc, char *argv[]){
 	
 	/**** Paso 3: Preparar el servidor para escuchar ****/
 
-	if (listen(s, 4) == -1){ /*Solo vamos a escuchar 4 simultaneos? Deberiamos confirmar la cantidad*/
+	if (listen(s, max_clients) == -1){
 		fprintf(stderr, "Error preparando servidor\n\r");
 		close(s);
 		return 1;
@@ -98,7 +115,31 @@ int main(int argc, char *argv[]){
 
 			n = sizeof(mensaje);
 			recibidos = read(s2, mensaje, n);
+			if (recibidos == -1){
+				fprintf(stderr, "Error leyendo el mensaje\n\r");
+				exit(1);
+			}
+			mensaje[recibidos] = '\0'; /* pongo el final de cadena */
+			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); /*Para que mostramos esta linea?*/
 			/*A partir de aqui interpretamos la cabecera*/
+			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
+			if(strcmp(method, "GET")==0){
+				/*Operamos para el metodo GET*/
+			}
+			else if(strcmp(method, "HEAD")==0){
+				/*Operamos para el metodo HEAD*/
+			}
+			else if(strcmp(method, "PUT")==0){
+				/*Operamos para el metodo PUT*/
+			}
+			else if(strcmp(method, "DELETE")==0){
+				/*Operamos para el metodo DELETE*/
+			}
+			else{
+				/*Mensaje de error 405 Method not allowed*/
+				/*Hacemos un HTTP o sacamos stderr?*/
+			}
+			
 		}
 		else{ /* soy el padre */
 			close(s2); /* el padre no usa esta conexión */
