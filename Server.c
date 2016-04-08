@@ -20,10 +20,11 @@ int main(int argc, char *argv[]){
 	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
 	char *method, *route;
 	char c;
-	int i, s2, proceso, n, recibidos, max_clients=4;
+	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
 	unsigned int long_client_addr;
 	struct sockaddr_in server_addr, client_addr;
 	char answer[1024], mensaje[1024], parameter[200];
+	FILE *conf_file, *asset;
 	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
 	
 	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
@@ -171,6 +172,18 @@ int main(int argc, char *argv[]){
 				/*Hacemos un HTTP o sacamos stderr?*/
 			}
 			
+			/**** Paso 6: Enviar respuesta ****/
+			n = strlen(answer);
+			enviados = write(s2, answer, n);
+			if (enviados == -1 || enviados < n)
+			{
+				fprintf(stderr, "Error enviando la respuesta (%d)\n\r",enviados);
+				close(s);
+				return 1;
+			}
+
+			close(s2);
+			exit(0); /* el hijo ya no tiene que hacer nada */
 		}
 		else{ /* soy el padre */
 			close(s2); /* el padre no usa esta conexión */
