@@ -24,6 +24,7 @@ int main(int argc, char *argv[]){
 	unsigned int long_client_addr;
 	struct sockaddr_in server_addr, client_addr;
 	char answer[1024], mensaje[1024], parameter[200];
+	FILE *conf_file, *asset;
 	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
 	
 	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
