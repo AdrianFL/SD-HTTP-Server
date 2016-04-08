@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include <time.h> /*Aun no se si esta hace falta*/
+#include <time.h> 
 
 int s;
 
@@ -18,12 +18,12 @@ void finalizar (int senyal){
 int main(int argc, char *argv[]){
 	char *port_server="6000";
 	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
-	char *method;
+	char *method, *route;
+	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4;
 	unsigned int long_client_addr;
 	struct sockaddr_in server_addr, client_addr;
-	char respuesta[1024], mensaje[1024], parameter[200];
-	FILE *conf_file;
+	char answer[1024], mensaje[1024], parameter[200];
 	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
 	
 	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
 						}
 					}
 				}
-				
+				fclose(conf_file);
 			}
 		}
 		else if(i==1){
@@ -124,19 +124,50 @@ int main(int argc, char *argv[]){
 			/*A partir de aqui interpretamos la cabecera*/
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
 			if(strcmp(method, "GET")==0){
-				/*Operamos para el metodo GET*/
+				route=strtok(NULL, " ");
+				strcat(document_root, route); /* Falta una /?? */
+				asset=fopen(document_root, "r");
+				if(asset==NULL){
+					strcpy(answer, "HTTP1.1 404 not found\n");
+					/*Cabeceras*/
+					strcat(answer, "\n");
+				}
+				else{
+					strcpy(answer, "HTTP1.1 200 OK\n");
+					/*Cabeceras*/
+					while(c=getc(asset)!=EOF){
+						strcat(answer, c);
+					}
+					strcat(answer, "\0");
+				}
 			}
 			else if(strcmp(method, "HEAD")==0){
-				/*Operamos para el metodo HEAD*/
+				route=strtok(NULL, " ");
+				strcat(document_root, route);
+				asset=fopen(document_root, "r");
+				if(asset==NULL){
+					strcpy(answer, "HTTP1.1 404 not found\n");
+					/*Cabeceras*/
+					strcat(answer, "\n");
+				}
+				else{
+					strcpy(answer, "HTTP1.1 200 OK\n");
+					/*Cabeceras*/
+					strcat(answer, "\n");
+				}
 			}
 			else if(strcmp(method, "PUT")==0){
+				route=strtok(NULL, " ");
+				strcat(document_root, route);
 				/*Operamos para el metodo PUT*/
 			}
 			else if(strcmp(method, "DELETE")==0){
+				route=strtok(NULL, " ");
+				strcat(document_root, route);
 				/*Operamos para el metodo DELETE*/
 			}
 			else{
-				/*Mensaje de error 405 Method not allowed*/
+				strcpy(answer, "HTTP1.1 405 method not allowed\n");
 				/*Hacemos un HTTP o sacamos stderr?*/
 			}
 			
