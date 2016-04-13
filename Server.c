@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
 			close(s); /* el hijo no necesita el socket general */
 
 			/**** Paso 5: Leer el mensaje ****/
-
+			char send[1024];
 			n = sizeof(mensaje);
 			recibidos = read(s2, mensaje, n);
 			if (recibidos == -1){
@@ -124,6 +124,7 @@ int main(int argc, char *argv[]){
 			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); /*Para que mostramos esta linea?*/
 			/*A partir de aqui interpretamos la cabecera*/
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
+			
 			if(strcmp(method, "GET")==0){
 				route=strtok(NULL, " ");
 				version=strtok(NULL," ");
@@ -133,7 +134,7 @@ int main(int argc, char *argv[]){
 					if(asset==NULL){
 						strcpy(answer, "HTTP1.1 404 not found\n");
 						/*Cabeceras*/
-						strcat(answer, "\n");
+						strcat(answer, "\n"); //Es necesario?
 					}
 					else{
 						strcpy(answer, "HTTP1.1 200 OK\n");
@@ -143,6 +144,19 @@ int main(int argc, char *argv[]){
 						}
 						strcat(answer, "\0");
 					}
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					//.
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 				}
@@ -150,6 +164,7 @@ int main(int argc, char *argv[]){
 					fclose(asset);
 				}
 			}
+			
 			else if(strcmp(method, "HEAD")==0){
 				route=strtok(NULL, " ");
 				version=strtok(NULL," ");
@@ -163,9 +178,24 @@ int main(int argc, char *argv[]){
 					}
 					else{
 						strcpy(answer, "HTTP1.1 200 OK\n");
+						printf("Entra");
 						/*Cabeceras*/
 						strcat(answer, "\n");
 					}
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					//.
+					
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 				}
@@ -173,6 +203,7 @@ int main(int argc, char *argv[]){
 					fclose(asset);
 				}
 			}
+			
 			else if(strcmp(method, "PUT")==0){
 				route=strtok(NULL, " ");
 				version=strtok(NULL," ");
@@ -189,6 +220,7 @@ int main(int argc, char *argv[]){
 					fclose(asset);
 				}
 			}
+			
 			else if(strcmp(method, "DELETE")==0){
 				int aux;
 				aux=-1;
@@ -204,6 +236,19 @@ int main(int argc, char *argv[]){
 					}else{
 						strcat(answer,"HTTP1.1 200 OK\n");
 					}
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					//.
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 					/*Cabeceras???*/
