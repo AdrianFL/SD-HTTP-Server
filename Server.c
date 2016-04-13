@@ -148,7 +148,7 @@ int main(int argc, char *argv[]){
 					if(asset==NULL){
 						strcpy(answer, "HTTP/1.1 404 not found\n\r");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");
+						strcat(answer, "Content-Length: 143");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -158,6 +158,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						/*Cabeceras*/
 						strcat(answer, "\n\r"); //Es necesario?
+						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
 					}
 					else{
 						strcpy(answer, "HTTP/1.1 200 OK\n\r");
@@ -186,7 +187,7 @@ int main(int argc, char *argv[]){
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");
+						strcat(answer, "Content-Length: 90");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -194,6 +195,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+						strcat(answer, "<html> <title>Error 505</title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");
 				}
 				if (asset!=NULL){ 
 					fclose(asset);
@@ -207,7 +209,7 @@ int main(int argc, char *argv[]){
 					if(asset==NULL){
 						strcpy(answer, "HTTP/1.1 404 not found\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");
+						strcat(answer, "Content-Length: 143");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -216,7 +218,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						strcat(answer, "\n");
-						
+						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
 					}
 					else{
 						strcpy(answer, "HTTP/1.1 200 OK\n");
@@ -236,7 +238,7 @@ int main(int argc, char *argv[]){
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");
+						strcat(answer, "Content-Length: 90");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -244,7 +246,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-				}
+						strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");				}
 				if (asset!=NULL){ 
 					fclose(asset);
 				}
@@ -260,7 +262,7 @@ int main(int argc, char *argv[]){
 					if(asset==NULL){
 						strcat(answer,"403 Forbidden\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");
+						strcat(answer, "Content-Length: 77");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -269,6 +271,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						strcat(answer, "\n");
+						strcat(answer, "<html> <title>Error 403</title>\n<h1> Error 403: Acceso Denegado. </h1> </html>");
 						
 					}else{
 						strcpy(answer, "HTTP/1.1 201 CREATED\n");
@@ -289,7 +292,7 @@ int main(int argc, char *argv[]){
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");
+						strcat(answer, "Content-Length: 90");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -297,7 +300,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-				}
+						strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");				}
 				if (asset!=NULL){
 					fclose(assetPUT);
 				}
@@ -314,8 +317,7 @@ int main(int argc, char *argv[]){
 					if(aux!=0){
 						strcat(answer,"HTTP/1.1 404 not found\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: ");
-						strcat(answer, (char)size); /*No se si funcionará el casteo*/
+						strcat(answer, "Content-Length: 143");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -323,7 +325,8 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-					}else{
+						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
+						}else{
 						strcat(answer,"HTTP/1.1 200 OK\n");
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: ");
@@ -339,8 +342,7 @@ int main(int argc, char *argv[]){
 				}else{
 					strcat(answer,"HTTP/1.1 505 HTTP version not supported\n");
 					strcat(answer, "Connection: close\n\r");
-					strcat(answer, "Content-Length: ");
-					strcat(answer, (char)size); /*No se si funcionará el casteo*/
+					strcat(answer, "Content-Length: 90");
 					strcat(answer, "\n\r");
 					strcat(answer, "Content-Type: txt/html\n\r");
 					strcat(answer, "Server: Servidor SD\n\r");
@@ -348,13 +350,12 @@ int main(int argc, char *argv[]){
 					strcat(answer, date);
 					strcat(answer, "\n\r");
 					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-				}	
+					strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");				}	
 			}
 			else{
 				strcpy(answer, "HTTP/1.1 405 method not allowed\n");
 				strcat(answer, "Connection: close\n\r");
-				strcat(answer, "Content-Length: ");
-				strcat(answer, (char)size); /*No se si funcionará el casteo*/
+				strcat(answer, "Content-Length: 82");
 				strcat(answer, "\n\r");
 				strcat(answer, "Content-Type: txt/html\n\r");
 				strcat(answer, "Server: Servidor SD\n\r");
@@ -362,6 +363,7 @@ int main(int argc, char *argv[]){
 				strcat(answer, date);
 				strcat(answer, "\n\r");
 				strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+				strcat(answer,"<html> <title>  Error 405 </title>\n<h1> Error 405: Método no permitido. </h1> </html>");
 			}
 			
 			/**** Paso 6: Enviar respuesta ****/
