@@ -39,7 +39,8 @@ int main(int argc, char *argv[]){
 		if(strcmp(argv[i],"-c")==0){ /*Faltan mas comprobaciones? */
 			i++;
 			if(i<argc){
-				conf_file=fopen(argv[i], "r");  /*Podemos crear un fichero de configuracion donde sea obligatorio pasar todos los parametros?*/
+				conf_file=fopen(argv[i], "r");
+				if(conf_file!=NULL){
 				if(fgets(parameter, 200, conf_file)!=null){
 					strcpy(document_root, parameter);
 					if(fgets(parameter, 200, conf_file)!=null){
@@ -55,6 +56,10 @@ int main(int argc, char *argv[]){
 					}
 				}
 				fclose(conf_file);
+				}
+				else{
+					fprintf(stderr, "Error. No se ha podido abrir el fichero de configuración");
+				}
 			}
 		}
 		else if(i==1){
