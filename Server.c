@@ -252,20 +252,51 @@ int main(int argc, char *argv[]){
 			
 			else if(strcmp(method, "PUT")==0){
 				strcat(document_root, route);
-				asset=fopen(document_root, "w");
+				
 				/*Operamos para el metodo PUT*/
-				if(strcmp(version,"HTTP/1.1")==0){ 
+				if(strcmp(version,"HTTP/1.1")==0){
+					asset=fopen(document_root, "w");
+					
 					if(asset==NULL){
 						strcat(answer,"403 Forbidden\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+						strcat(answer, "\n");
+						
 					}else{
 						strcpy(answer, "HTTP/1.1 201 CREATED\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+						strcat(answer, "\n");
 
 					}
 					
 
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
-					/*Cabeceras???*/
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 				}
 				if (asset!=NULL){
 					fclose(assetPUT);
