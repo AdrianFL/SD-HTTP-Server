@@ -18,7 +18,7 @@ void finalizar (int senyal){
 int main(int argc, char *argv[]){
 	char *port_server="6000";
 	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
-	char *method, *route;
+	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
 	unsigned int long_client_addr;
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
 			close(s); /* el hijo no necesita el socket general */
 
 			/**** Paso 5: Leer el mensaje ****/
-
+			char send[1024];
 			n = sizeof(mensaje);
 			recibidos = read(s2, mensaje, n);
 			if (recibidos == -1){
@@ -124,48 +124,135 @@ int main(int argc, char *argv[]){
 			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); /*Para que mostramos esta linea?*/
 			/*A partir de aqui interpretamos la cabecera*/
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
+			
 			if(strcmp(method, "GET")==0){
 				route=strtok(NULL, " ");
+				version=strtok(NULL," ");
 				strcat(document_root, route); /* Falta una /?? */
 				asset=fopen(document_root, "r");
-				if(asset==NULL){
-					strcpy(answer, "HTTP1.1 404 not found\n");
-					/*Cabeceras*/
-					strcat(answer, "\n");
-				}
-				else{
-					strcpy(answer, "HTTP1.1 200 OK\n");
-					/*Cabeceras*/
-					while(c=getc(asset)!=EOF){
-						strcat(answer, c);
+				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+					if(asset==NULL){
+						strcpy(answer, "HTTP1.1 404 not found\n");
+						/*Cabeceras*/
+						strcat(answer, "\n"); //Es necesario?
 					}
-					strcat(answer, "\0");
+					else{
+						strcpy(answer, "HTTP1.1 200 OK\n");
+						/*Cabeceras*/
+						while(c=getc(asset)!=EOF){
+							strcat(answer, c);
+						}
+						strcat(answer, "\0");
+					}
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					//.
+				}else{
+					strcat(answer,"505 HTTP version not supported\n");
+				}
+				if (asset!=NULL){ //anyadido Alejandro
+					fclose(asset);
 				}
 			}
+			
 			else if(strcmp(method, "HEAD")==0){
 				route=strtok(NULL, " ");
+				version=strtok(NULL," ");
 				strcat(document_root, route);
 				asset=fopen(document_root, "r");
-				if(asset==NULL){
-					strcpy(answer, "HTTP1.1 404 not found\n");
-					/*Cabeceras*/
-					strcat(answer, "\n");
+				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+					if(asset==NULL){
+						strcpy(answer, "HTTP1.1 404 not found\n");
+						/*Cabeceras*/
+						strcat(answer, "\n");
+					}
+					else{
+						strcpy(answer, "HTTP1.1 200 OK\n");
+						printf("Entra");
+						/*Cabeceras*/
+						strcat(answer, "\n");
+					}
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					//.
+					
+				}else{
+					strcat(answer,"505 HTTP version not supported\n");
 				}
-				else{
-					strcpy(answer, "HTTP1.1 200 OK\n");
-					/*Cabeceras*/
-					strcat(answer, "\n");
+				if (asset!=NULL){ //anyadido Alejandro
+					fclose(asset);
 				}
 			}
+			
 			else if(strcmp(method, "PUT")==0){
 				route=strtok(NULL, " ");
+				version=strtok(NULL," ");
 				strcat(document_root, route);
 				/*Operamos para el metodo PUT*/
+				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+				
+				
+				}else{
+					strcat(answer,"505 HTTP version not supported\n");
+					/*Cabeceras???*/
+				}
+				if (asset!=NULL){ //anyadido Alejandro
+					fclose(asset);
+				}
 			}
+			
 			else if(strcmp(method, "DELETE")==0){
+				int aux;
+				aux=-1;
 				route=strtok(NULL, " ");
+				version=strtok(NULL," ");
+				char name[strlen(route)];
 				strcat(document_root, route);
 				/*Operamos para el metodo DELETE*/
+				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+					aux=remove(name);
+					if(aux!=0){
+						strcat(answer,"HTTP1.1 404 not found\n");
+					}else{
+						strcat(answer,"HTTP1.1 200 OK\n");
+					}
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					//.
+				}else{
+					strcat(answer,"505 HTTP version not supported\n");
+					/*Cabeceras???*/
+				}	
 			}
 			else{
 				strcpy(answer, "HTTP1.1 405 method not allowed\n");
