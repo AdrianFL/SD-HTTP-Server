@@ -203,7 +203,7 @@ int main(int argc, char *argv[]){
 			else if(strcmp(method, "HEAD")==0){
 				strcat(document_root, route);
 				asset=fopen(document_root, "r");
-				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+				if(strcmp(version,"HTTP/1.1")==0){
 					if(asset==NULL){
 						strcpy(answer, "HTTP/1.1 404 not found\n");
 						strcat(answer, "Connection: close\n\r");
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]){
 					strcat(answer,"505 HTTP version not supported\n");
 					/*Cabeceras???*/
 				}
-				if (asset!=NULL){ //anyadido Alejandro
+				if (asset!=NULL){
 					fclose(assetPUT);
 				}
 			}
@@ -278,7 +278,7 @@ int main(int argc, char *argv[]){
 				char name[strlen(route)];
 				strcat(document_root, route);
 				/*Operamos para el metodo DELETE*/
-				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+				if(strcmp(version,"HTTP/1.1")==0){
 					aux=remove(name);
 					if(aux!=0){
 						strcat(answer,"HTTP/1.1 404 not found\n");
