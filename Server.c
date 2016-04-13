@@ -343,7 +343,6 @@ int main(int argc, char *argv[]){
 					strcat(answer,"HTTP/1.1 505 HTTP version not supported\n");
 					strcat(answer, "Connection: close\n\r");
 					strcat(answer, "Content-Length: 90");
-					strcat(answer, (char)size); /*No se si funcionará el casteo*/
 					strcat(answer, "\n\r");
 					strcat(answer, "Content-Type: txt/html\n\r");
 					strcat(answer, "Server: Servidor SD\n\r");
@@ -357,7 +356,6 @@ int main(int argc, char *argv[]){
 				strcpy(answer, "HTTP/1.1 405 method not allowed\n");
 				strcat(answer, "Connection: close\n\r");
 				strcat(answer, "Content-Length: 82");
-				strcat(answer, (char)size); /*No se si funcionará el casteo*/
 				strcat(answer, "\n\r");
 				strcat(answer, "Content-Type: txt/html\n\r");
 				strcat(answer, "Server: Servidor SD\n\r");
