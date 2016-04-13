@@ -118,7 +118,16 @@ int main(int argc, char *argv[]){
 			close(s); /* el hijo no necesita el socket general */
 
 			/**** Paso 5: Leer el mensaje ****/
+			
 			char send[1024];
+			/*
+			int tam_recurso;
+			char tam[100];
+			char *arch;
+			FILE *assetPUT=fopen("") //Aqui va la ruta del archivo
+			char*archPUT
+			*/
+			
 			n = sizeof(mensaje);
 			recibidos = read(s2, mensaje, n);
 			if (recibidos == -1){
@@ -143,18 +152,30 @@ int main(int argc, char *argv[]){
 					}
 					else{
 						strcpy(answer, "HTTP1.1 200 OK\n");
+						/*
+						fseek(asset,0L,SEEK_END);
+						tam_recurso=ftell(asset);
+						sprintf(tam,"%d",tam_recurso);
+						fseek(asset,0L,SEEK_SET);
+						arch=malloc(tam_recurso);
+						if(arch!=NULL){
+							fread(arch,1,tam_recurso,asset);
+						}
+						*/
 						/*Cabeceras*/
+						
 						while(c=getc(asset)!=EOF){
 							strcat(answer, c);
 						}
 						strcat(answer, "\0");
+						
 					}
 					//cabecera
 					strcopy(send,"HTTP/1.1");
 					strcat(send,answer);
 					strcat(send,"\r\n");
 					strcat(send,"Content length: ");
-					strcat(send, ); //aqui va el tamanyo
+					strcat(send,tam); //aqui va el tamanyo
 					strcat(send,"\r\n");
 					strcat(send,"Content type:text/html ");
 					strcat(send,"\r\n");
@@ -180,10 +201,17 @@ int main(int argc, char *argv[]){
 						strcpy(answer, "HTTP1.1 404 not found\n");
 						/*Cabeceras*/
 						strcat(answer, "\n");
+						
 					}
 					else{
 						strcpy(answer, "HTTP1.1 200 OK\n");
 						printf("Entra");
+						/*
+						fseek(asset,0L,SEEK_END);
+						tam_recurso=ftell(asset);
+						sprintf(tam,"%d",tam_recurso);
+						fseek(asset,0L,SEEK_SET);
+						*/
 						/*Cabeceras*/
 						strcat(answer, "\n");
 					}
@@ -213,16 +241,55 @@ int main(int argc, char *argv[]){
 				route=strtok(NULL, " ");
 				version=strtok(NULL," ");
 				strcat(document_root, route);
+				asset=fopen(document_root, "w");
 				/*Operamos para el metodo PUT*/
 				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
-				
-				
+					if(asset==NULL){
+						strcat(answer,"403 Forbidden\n");
+					}else{
+						strcpy(answer, "HTTP1.1 201 CREATED\n");
+						/*
+						fseek(assetPUT,0L,SEEK_END);
+						tam_recurso=ftell(assetPUT);
+						sprintf(tam,"%d",tam_recurso);
+						fseek(assetPUT,0L,SEEK_SET);
+						archPUT=malloc(tam_recurso);
+						if(archPUT!=NULL){
+							fread(archPUT,1,tam_recurso,assetPUT);
+						}
+						fputs(archPUT,asset);
+						fclose(asset);
+						*/
+					}
+					
+					//cabecera
+					strcopy(send,"HTTP/1.1");
+					strcat(send,answer);
+					strcat(send,"\r\n");
+					strcat(send,"Content length: ");
+					strcat(send, ); //aqui va el tamanyo
+					strcat(send,"\r\n");
+					strcat(send,"Content type:text/html ");
+					strcat(send,"\r\n");
+					strcat(send,"Server: SD server");
+					strcat(send,"\r\n");
+					strcat(send,"\r\n");
+					
+					strcat(send,"<html><h1>");
+					//.
+					/*
+					if(strcmp(respuesta,"HTTP1.1 201 CREATED")==0){
+					    strcat(send,"Archivo creado correctamente</h1></html>");
+				    }else{
+					    strcat(send,"Error 403: Acceso denegado</h1></html>");
+				    }
+					*/
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 					/*Cabeceras???*/
 				}
 				if (asset!=NULL){ //anyadido Alejandro
-					fclose(asset);
+					fclose(assetPUT);
 				}
 			}
 			
