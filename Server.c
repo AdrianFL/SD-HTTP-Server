@@ -1,3 +1,7 @@
+//Mariano López Escudero
+//Alejandro Martínez Martínez
+//Adrián Francés Lillo
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -26,6 +30,10 @@ int main(int argc, char *argv[]){
 	char answer[1024], mensaje[1024], parameter[200];
 	FILE *conf_file, *asset;
 	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
+	long int size;
+	time_t time;
+	struct tm *tmPtr; 
+	char date[80];
 	
 	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
 	if (argc < 2){
@@ -119,15 +127,6 @@ int main(int argc, char *argv[]){
 
 			/**** Paso 5: Leer el mensaje ****/
 			
-			char send[1024];
-			/*
-			int tam_recurso;
-			char tam[100];
-			char *arch;
-			FILE *assetPUT=fopen("") //Aqui va la ruta del archivo
-			char*archPUT
-			*/
-			
 			n = sizeof(mensaje);
 			recibidos = read(s2, mensaje, n);
 			if (recibidos == -1){
@@ -136,33 +135,46 @@ int main(int argc, char *argv[]){
 			}
 			mensaje[recibidos] = '\0'; /* pongo el final de cadena */
 			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); /*Para que mostramos esta linea?*/
-			/*A partir de aqui interpretamos la cabecera*/
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
-			
+			route=strtok(NULL, " ");
+			version=strtok(NULL," ");
+			time = time(NULL);
+			tmPtr = localtime(&time);
+			strftime(date, 80, "%H:%M:%S, %A de %B de %Y", tmPtr);
 			if(strcmp(method, "GET")==0){
-				route=strtok(NULL, " ");
-				version=strtok(NULL," ");
-				strcat(document_root, route); /* Falta una /?? */
-				asset=fopen(document_root, "r");
-				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+				strcat(document_root, route);
+				if(strcmp(version,"HTTP/1.1")==0){ 
+					asset=fopen(document_root, "r");
 					if(asset==NULL){
-						strcpy(answer, "HTTP1.1 404 not found\n");
+						strcpy(answer, "HTTP/1.1 404 not found\n\r");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						/*Cabeceras*/
-						strcat(answer, "\n"); //Es necesario?
+						strcat(answer, "\n\r"); //Es necesario?
 					}
 					else{
-						strcpy(answer, "HTTP1.1 200 OK\n");
-						/*
+						strcpy(answer, "HTTP/1.1 200 OK\n\r");
 						fseek(asset,0L,SEEK_END);
-						tam_recurso=ftell(asset);
-						sprintf(tam,"%d",tam_recurso);
+						size=ftell(asset);
 						fseek(asset,0L,SEEK_SET);
-						arch=malloc(tam_recurso);
-						if(arch!=NULL){
-							fread(arch,1,tam_recurso,asset);
-						}
-						*/
-						/*Cabeceras*/
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: ");
+						strcat(answer, (char)size); /*No se si funcionará el casteo*/
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+						
 						
 						while(c=getc(asset)!=EOF){
 							strcat(answer, c);
@@ -170,120 +182,87 @@ int main(int argc, char *argv[]){
 						strcat(answer, "\0");
 						
 					}
-					//cabecera
-					strcopy(send,"HTTP/1.1");
-					strcat(send,answer);
-					strcat(send,"\r\n");
-					strcat(send,"Content length: ");
-					strcat(send,tam); //aqui va el tamanyo
-					strcat(send,"\r\n");
-					strcat(send,"Content type:text/html ");
-					strcat(send,"\r\n");
-					strcat(send,"Server: SD server");
-					strcat(send,"\r\n");
-					strcat(send,"\r\n");
-					//.
+
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 				}
-				if (asset!=NULL){ //anyadido Alejandro
+				if (asset!=NULL){ 
 					fclose(asset);
 				}
 			}
 			
 			else if(strcmp(method, "HEAD")==0){
-				route=strtok(NULL, " ");
-				version=strtok(NULL," ");
 				strcat(document_root, route);
 				asset=fopen(document_root, "r");
 				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
 					if(asset==NULL){
-						strcpy(answer, "HTTP1.1 404 not found\n");
-						/*Cabeceras*/
+						strcpy(answer, "HTTP/1.1 404 not found\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						strcat(answer, "\n");
 						
 					}
 					else{
-						strcpy(answer, "HTTP1.1 200 OK\n");
-						printf("Entra");
-						/*
-						fseek(asset,0L,SEEK_END);
-						tam_recurso=ftell(asset);
-						sprintf(tam,"%d",tam_recurso);
-						fseek(asset,0L,SEEK_SET);
-						*/
-						/*Cabeceras*/
+						strcpy(answer, "HTTP/1.1 200 OK\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type:\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						strcat(answer, "\n");
 					}
-					//cabecera
-					strcopy(send,"HTTP/1.1");
-					strcat(send,answer);
-					strcat(send,"\r\n");
-					strcat(send,"Content length: ");
-					strcat(send, ); //aqui va el tamanyo
-					strcat(send,"\r\n");
-					strcat(send,"Content type:text/html ");
-					strcat(send,"\r\n");
-					strcat(send,"Server: SD server");
-					strcat(send,"\r\n");
-					strcat(send,"\r\n");
-					//.
+
 					
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: 0");
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 				}
-				if (asset!=NULL){ //anyadido Alejandro
+				if (asset!=NULL){ 
 					fclose(asset);
 				}
 			}
 			
 			else if(strcmp(method, "PUT")==0){
-				route=strtok(NULL, " ");
-				version=strtok(NULL," ");
 				strcat(document_root, route);
 				asset=fopen(document_root, "w");
 				/*Operamos para el metodo PUT*/
-				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
+				if(strcmp(version,"HTTP/1.1")==0){ 
 					if(asset==NULL){
 						strcat(answer,"403 Forbidden\n");
 					}else{
-						strcpy(answer, "HTTP1.1 201 CREATED\n");
-						/*
-						fseek(assetPUT,0L,SEEK_END);
-						tam_recurso=ftell(assetPUT);
-						sprintf(tam,"%d",tam_recurso);
-						fseek(assetPUT,0L,SEEK_SET);
-						archPUT=malloc(tam_recurso);
-						if(archPUT!=NULL){
-							fread(archPUT,1,tam_recurso,assetPUT);
-						}
-						fputs(archPUT,asset);
-						fclose(asset);
-						*/
+						strcpy(answer, "HTTP/1.1 201 CREATED\n");
+
 					}
 					
-					//cabecera
-					strcopy(send,"HTTP/1.1");
-					strcat(send,answer);
-					strcat(send,"\r\n");
-					strcat(send,"Content length: ");
-					strcat(send, ); //aqui va el tamanyo
-					strcat(send,"\r\n");
-					strcat(send,"Content type:text/html ");
-					strcat(send,"\r\n");
-					strcat(send,"Server: SD server");
-					strcat(send,"\r\n");
-					strcat(send,"\r\n");
-					
-					strcat(send,"<html><h1>");
-					//.
-					/*
-					if(strcmp(respuesta,"HTTP1.1 201 CREATED")==0){
-					    strcat(send,"Archivo creado correctamente</h1></html>");
-				    }else{
-					    strcat(send,"Error 403: Acceso denegado</h1></html>");
-				    }
-					*/
+
 				}else{
 					strcat(answer,"505 HTTP version not supported\n");
 					/*Cabeceras???*/
@@ -296,39 +275,62 @@ int main(int argc, char *argv[]){
 			else if(strcmp(method, "DELETE")==0){
 				int aux;
 				aux=-1;
-				route=strtok(NULL, " ");
-				version=strtok(NULL," ");
 				char name[strlen(route)];
 				strcat(document_root, route);
 				/*Operamos para el metodo DELETE*/
 				if(strcmp(version,"HTTP/1.1")==0){ //anyadido Alejandro
 					aux=remove(name);
 					if(aux!=0){
-						strcat(answer,"HTTP1.1 404 not found\n");
+						strcat(answer,"HTTP/1.1 404 not found\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: ");
+						strcat(answer, (char)size); /*No se si funcionará el casteo*/
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 					}else{
-						strcat(answer,"HTTP1.1 200 OK\n");
+						strcat(answer,"HTTP/1.1 200 OK\n");
+						strcat(answer, "Connection: close\n\r");
+						strcat(answer, "Content-Length: ");
+						strcat(answer, (char)size); /*No se si funcionará el casteo*/
+						strcat(answer, "\n\r");
+						strcat(answer, "Content-Type: txt/html\n\r");
+						strcat(answer, "Server: Servidor SD\n\r");
+						strcat(answer, "Date: ");
+						strcat(answer, date);
+						strcat(answer, "\n\r");
+						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 					}
-					//cabecera
-					strcopy(send,"HTTP/1.1");
-					strcat(send,answer);
-					strcat(send,"\r\n");
-					strcat(send,"Content length: ");
-					strcat(send, ); //aqui va el tamanyo
-					strcat(send,"\r\n");
-					strcat(send,"Content type:text/html ");
-					strcat(send,"\r\n");
-					strcat(send,"Server: SD server");
-					strcat(send,"\r\n");
-					strcat(send,"\r\n");
-					//.
 				}else{
-					strcat(answer,"505 HTTP version not supported\n");
-					/*Cabeceras???*/
+					strcat(answer,"HTTP/1.1 505 HTTP version not supported\n");
+					strcat(answer, "Connection: close\n\r");
+					strcat(answer, "Content-Length: ");
+					strcat(answer, (char)size); /*No se si funcionará el casteo*/
+					strcat(answer, "\n\r");
+					strcat(answer, "Content-Type: txt/html\n\r");
+					strcat(answer, "Server: Servidor SD\n\r");
+					strcat(answer, "Date: ");
+					strcat(answer, date);
+					strcat(answer, "\n\r");
+					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 				}	
 			}
 			else{
-				strcpy(answer, "HTTP1.1 405 method not allowed\n");
-				/*Hacemos un HTTP o sacamos stderr?*/
+				strcpy(answer, "HTTP/1.1 405 method not allowed\n");
+				strcat(answer, "Connection: close\n\r");
+				strcat(answer, "Content-Length: ");
+				strcat(answer, (char)size); /*No se si funcionará el casteo*/
+				strcat(answer, "\n\r");
+				strcat(answer, "Content-Type: txt/html\n\r");
+				strcat(answer, "Server: Servidor SD\n\r");
+				strcat(answer, "Date: ");
+				strcat(answer, date);
+				strcat(answer, "\n\r");
+				strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 			}
 			
 			/**** Paso 6: Enviar respuesta ****/
