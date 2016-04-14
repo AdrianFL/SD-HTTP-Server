@@ -133,6 +133,18 @@ int main(int argc, char *argv[]){
 			recibidos = read(s2, mensaje, n);
 			if (recibidos == -1){
 				fprintf(stderr, "Error leyendo el mensaje\n\r");
+				strcat(answer,"HTTP/1.1 500 Internal Server Error\n");
+					strcat(answer, "Connection: close\n\r");
+					strcat(answer, "Content-Length: 96");
+					strcat(answer, "\n\r");
+					strcat(answer, "Content-Type: txt/html\n\r");
+					strcat(answer, "Server: Servidor SD\n\r");
+					strcat(answer, "Date: ");
+					strcat(answer, date);
+					strcat(answer, "\n\r");
+					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+					strcat(answer, "\n\r");
+					strcat(answer, "<html> <title>Error 500</title>\n<h1> Error 500: Error Interno. </h1> </html>");
 				exit(1);
 			}
 			mensaje[recibidos] = '\0'; /* pongo el final de cadena */
