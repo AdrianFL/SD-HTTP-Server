@@ -145,8 +145,17 @@ int main(int argc, char *argv[]){
 					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 					strcat(answer, "\n\r");
 					strcat(answer, "<html> <title>Error 500</title>\n<h1> Error 500: Error Interno. </h1> </html>");
-				exit(1);
-			}
+					n = strlen(answer);
+				enviados = write(s2, answer, n);
+				if (enviados == -1 || enviados < n)
+				{
+					fprintf(stderr, "Error enviando la respuesta (%d)\n\r",enviados);
+					close(s);
+					return 1;
+				}
+
+			close(s2);
+			exit(0); /* el hijo ya no tiene que hacer nada */			}
 			mensaje[recibidos] = '\0'; /* pongo el final de cadena */
 			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); /*Para que mostramos esta linea?*/
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
