@@ -21,61 +21,59 @@ void finalizar (int senyal){
 
 int main(int argc, char *argv[]){
 	char *port_server="6000";
-	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
+	char *split, *directoryIndex="Index.html "; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
 	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
 	unsigned int long_client_addr;
 	struct sockaddr_in server_addr, client_addr;
-	char answer[1024], mensaje[1024], parameter[200];
+	char answer[1024], mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
 	FILE *conf_file, *asset;
-	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
-	long int size;
-	time_t time;
+	char *document_root="home/jose/Escritorio/Servidor "; /*Esto es un puntero? O deberia ser un array?*/
+	int size;
+	time_t tiempo;
 	struct tm *tmPtr; 
 	char date[80];
+	char tamanyo[100];
+	char *document;
 	
-	/*Esto solo tiene sentido si es obligatorio introducir un puerto */
-	if (argc < 2){
-		fprintf(stderr, "Error. Debe indicar el puerto del servidor\r\n");
-		fprintf(stderr, "Sintaxis: %s <puerto>\n\r", argv[0]);
-		fprintf(stderr, "Ejemplo : %s 8574\"\n\r", argv[0]);
-		return 1;
-	}
-	
-	for(i=1; i<argc; i++){
-		if(strcmp(argv[i],"-c")==0){ /*Faltan mas comprobaciones? */
-			i++;
-			if(i<argc){
-				conf_file=fopen(argv[i], "r");
-				if(conf_file!=NULL){
-				if(fgets(parameter, 200, conf_file)!=null){
-					strcpy(document_root, parameter);
-					if(fgets(parameter, 200, conf_file)!=null){
-						max_clients=atoi(parameter);
-						if(fgets(parameter, 200, conf_file)!=null){ /*Tiene sentido indicarlo aqui y por linea de comandos?*/
-							if(strcmp(argv[1], "-c")==0){
-								strcpy(port_server, parameter);
-							}
-							if(fgets(parameter, 200, conf_file)!=null){
-								strcpy(directoryIndex, parameter);
-							}
-						}
-					}
-				}
-				fclose(conf_file);
-				}
-				else{
-					fprintf(stderr, "Error. No se ha podido abrir el fichero de configuración");
-				}
-			}
-		}
-		else if(i==1){
-			strcpy(port_server, argv[i]); /*Podriamos comprobar que sea >1024*/
-		}
+	if(argc>1){
+	  if(strcmp(argv[1], "-c")==0){
+	    conf_file=fopen(argv[2], "r");
+	   if(conf_file!=NULL){	
+	      fgets(parameter1, 800, conf_file);
+	      document_root=strtok(parameter1, " ");
+	      fgets(parameter, 800, conf_file);
+	      max_clients=atoi(parameter);
+	      fgets(parameter2, 800, conf_file);
+	      port_server=strtok(parameter2, " ");
+	      fgets(parameter3, 800, conf_file);
+	      directoryIndex=strtok(parameter3, " ");
+	      fclose(conf_file);
+	    }
+	  }
+	  else{
+	    port_server=argv[1];
+	    if(argc>2){
+	      if(strcmp(argv[2], "-c")==0){
+	    conf_file=fopen(argv[3], "r");
+	   if(conf_file!=NULL){	
+	      fgets(parameter1, 800, conf_file);
+	      document_root=strtok(parameter1, " ");
+	      fgets(parameter, 800, conf_file);
+	      max_clients=atoi(parameter);
+	      fgets(parameter2, 800, conf_file);
+	      fgets(parameter3, 800, conf_file);
+	      directoryIndex=strtok(parameter3, " ");
+	      fclose(conf_file);
+	    }
+	  }
+	    }
+	  }	
 	}
 	
 	/**** Paso 1: Abrir el socket ****/
+	
 
 	s = socket(AF_INET, SOCK_STREAM, 0); /* creo el socket */
 	if (s == -1){
@@ -83,9 +81,13 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	printf("Socket abierto\n\r");
+	//printf("%s\n",document_root);
+	//printf("%d\n",max_clients);
+	//printf("%s\n",port_server);
+	//printf("%s\n",directoryIndex);
 	
 	/**** Paso 2: Establecer la dirección (puerto) de escucha ****/
-
+	
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(atoi(port_server));
 	server_addr.sin_addr.s_addr = INADDR_ANY; /* cualquier IP del servidor */
@@ -131,6 +133,18 @@ int main(int argc, char *argv[]){
 			recibidos = read(s2, mensaje, n);
 			if (recibidos == -1){
 				fprintf(stderr, "Error leyendo el mensaje\n\r");
+				strcat(answer,"HTTP/1.1 500 Internal Server Error\n");
+					strcat(answer, "Connection: close\n\r");
+					strcat(answer, "Content-Length: 96");
+					strcat(answer, "\n\r");
+					strcat(answer, "Content-Type: txt/html\n\r");
+					strcat(answer, "Server: Servidor SD\n\r");
+					strcat(answer, "Date: ");
+					strcat(answer, date);
+					strcat(answer, "\n\r");
+					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+					strcat(answer, "\n\r");
+					strcat(answer, "<html> <title>Error 500</title>\n<h1> Error 500: Error Interno. </h1> </html>");
 				exit(1);
 			}
 			mensaje[recibidos] = '\0'; /* pongo el final de cadena */
@@ -138,13 +152,15 @@ int main(int argc, char *argv[]){
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
 			route=strtok(NULL, " ");
 			version=strtok(NULL," ");
-			time = time(NULL);
-			tmPtr = localtime(&time);
+			tiempo = time(NULL);
+			tmPtr = localtime(&tiempo);
 			strftime(date, 80, "%H:%M:%S, %A de %B de %Y", tmPtr);
+		 
 			if(strcmp(method, "GET")==0){
 				strcat(document_root, route);
-				if(strcmp(version,"HTTP/1.1")==0){ 
-					asset=fopen(document_root, "r");
+				     printf("%s\n",version);
+				if(strcmp(version,"HTTP/1.1")>=0){
+					asset=fopen(document_root, "r");					
 					if(asset==NULL){
 						strcpy(answer, "HTTP/1.1 404 not found\n\r");
 						strcat(answer, "Connection: close\n\r");
@@ -161,13 +177,20 @@ int main(int argc, char *argv[]){
 						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
 					}
 					else{
-						strcpy(answer, "HTTP/1.1 200 OK\n\r");
+					  					 
+						strcat(answer, "HTTP/1.1 200 OK\n\r");
 						fseek(asset,0L,SEEK_END);
 						size=ftell(asset);
+						sprintf(tamanyo,"%d",size);
 						fseek(asset,0L,SEEK_SET);
+						document=malloc(size);
+						if(document){
+						  fread(document,1,size,asset);
+						}
+						fclose(asset);
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: ");
-						strcat(answer, (char)size); /*No se si funcionará el casteo*/
+						strcat(answer,tamanyo); /*No se si funcionará el casteo*/
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -175,17 +198,18 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+						strcat(answer,"\n\r");
 						
-						
-						while(c=getc(asset)!=EOF){
-							strcat(answer, c);
+						if(document){
+						  strcat(answer,document);
 						}
-						strcat(answer, "\0");
-						
+						strcat(answer, "\n\r");
 					}
+				}
 
-				}else{
-					strcat(answer,"505 HTTP version not supported\n");
+				else{
+				  
+					strcat(answer,"HTTP/1.1 505 HTTP version not supported\n");
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: 90");
 						strcat(answer, "\n\r");
@@ -195,17 +219,15 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+						strcat(answer, "\n\r");
 						strcat(answer, "<html> <title>Error 505</title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");
-				}
-				if (asset!=NULL){ 
-					fclose(asset);
 				}
 			}
 			
 			else if(strcmp(method, "HEAD")==0){
 				strcat(document_root, route);
 				asset=fopen(document_root, "r");
-				if(strcmp(version,"HTTP/1.1")==0){
+				if(strcmp(version,"HTTP/1.1")>=0){
 					if(asset==NULL){
 						strcpy(answer, "HTTP/1.1 404 not found\n");
 						strcat(answer, "Connection: close\n\r");
@@ -236,7 +258,7 @@ int main(int argc, char *argv[]){
 
 					
 				}else{
-					strcat(answer,"505 HTTP version not supported\n");
+					strcat(answer,"HTTP/1.1 505 HTTP version not supported\n");
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: 90");
 						strcat(answer, "\n\r");
@@ -256,11 +278,11 @@ int main(int argc, char *argv[]){
 				strcat(document_root, route);
 				
 				/*Operamos para el metodo PUT*/
-				if(strcmp(version,"HTTP/1.1")==0){
+				if(strcmp(version,"HTTP/1.1")>=0){
 					asset=fopen(document_root, "w");
 					
 					if(asset==NULL){
-						strcat(answer,"403 Forbidden\n");
+						strcat(answer,"HTTP/1.1 403 Forbidden\n");
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: 77");
 						strcat(answer, "\n\r");
@@ -290,7 +312,7 @@ int main(int argc, char *argv[]){
 					
 
 				}else{
-					strcat(answer,"505 HTTP version not supported\n");
+					strcat(answer,"HTTP/1.1 505 HTTP version not supported\n");
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: 90");
 						strcat(answer, "\n\r");
@@ -302,7 +324,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");				}
 				if (asset!=NULL){
-					fclose(assetPUT);
+					fclose(asset);
 				}
 			}
 			
@@ -312,7 +334,7 @@ int main(int argc, char *argv[]){
 				char name[strlen(route)];
 				strcat(document_root, route);
 				/*Operamos para el metodo DELETE*/
-				if(strcmp(version,"HTTP/1.1")==0){
+				if(strcmp(version,"HTTP/1.1")>=0){
 					aux=remove(name);
 					if(aux!=0){
 						strcat(answer,"HTTP/1.1 404 not found\n");
@@ -329,8 +351,7 @@ int main(int argc, char *argv[]){
 						}else{
 						strcat(answer,"HTTP/1.1 200 OK\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: ");
-						strcat(answer, (char)size); /*No se si funcionará el casteo*/
+						strcat(answer, "Content-Length: 0");//Debemos dar un index html para put y delete!
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -350,7 +371,20 @@ int main(int argc, char *argv[]){
 					strcat(answer, date);
 					strcat(answer, "\n\r");
 					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-					strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");				}	
+					strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");
+				}	
+			}else if(strcmp(method,"OPTIONS")==0 || strcmp(method,"POST")==0 || strcmp("TRACE")==0 || strcmp(method,"CONNECT")==0){
+				strcpy(answer, "HTTP/1.1 400 bad request\n");
+				strcat(answer, "Connection: close\n\r");
+				strcat(answer, "Content-Length: 93");
+				strcat(answer, "\n\r");
+				strcat(answer, "Content-Type: txt/html\n\r");
+				strcat(answer, "Server: Servidor SD\n\r");
+				strcat(answer, "Date: ");
+				strcat(answer, date);
+				strcat(answer, "\n\r");
+				strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
+				strcat(answer,"<html> <title>  Error 400 </title>\n<h1> Error 400: Petición errónea. </h1> </html>");
 			}
 			else{
 				strcpy(answer, "HTTP/1.1 405 method not allowed\n");
