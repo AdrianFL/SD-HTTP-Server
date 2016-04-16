@@ -21,7 +21,7 @@ void finalizar (int senyal){
 
 int main(int argc, char *argv[]){
 	char *port_server="6000";
-	char *split, *directoryIndex="Index.html "; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
+	char *split, *directoryIndex="/Index.html"; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
 	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
@@ -29,7 +29,7 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in server_addr, client_addr;
 	char answer[1024], mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
 	FILE *conf_file, *asset;
-	char *document_root="home/jose/Escritorio/Servidor "; /*Esto es un puntero? O deberia ser un array?*/
+	char document_root[1024]="/home/jose/Escritorio/Servidor"; /*Esto es un puntero? O deberia ser un array?*/
 	int size;
 	time_t tiempo;
 	struct tm *tmPtr; 
@@ -72,6 +72,7 @@ int main(int argc, char *argv[]){
 	  }	
 	}
 	
+	
 	/**** Paso 1: Abrir el socket ****/
 	
 
@@ -97,6 +98,9 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	printf("Puerto de escucha establecido\n\r");
+	
+	//printf("%s\n",document_root);
+	//printf("%s\n",directoryIndex);
 	
 	/**** Paso 3: Preparar el servidor para escuchar ****/
 
@@ -183,10 +187,9 @@ int main(int argc, char *argv[]){
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						/*Cabeceras*/
 						strcat(answer, "\n\r"); //Es necesario?
-						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
+						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontraras... </html>");
 					}
-					else{
-					  					 
+					else{				 
 						strcat(answer, "HTTP/1.1 200 OK\n\r");
 						fseek(asset,0L,SEEK_END);
 						size=ftell(asset);
@@ -213,6 +216,7 @@ int main(int argc, char *argv[]){
 						  strcat(answer,document);
 						}
 						strcat(answer, "\n\r");
+						
 					}
 				}
 
@@ -249,7 +253,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 						strcat(answer, "\n");
-						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
+						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontraras... </html>");
 					}
 					else{
 						strcpy(answer, "HTTP/1.1 200 OK\n");
@@ -344,7 +348,7 @@ int main(int argc, char *argv[]){
 				strcat(document_root, route);
 				/*Operamos para el metodo DELETE*/
 				if(strcmp(version,"HTTP/1.1")>=0){
-					aux=remove(name);
+					aux=remove(document_root);
 					if(aux!=0){
 						strcat(answer,"HTTP/1.1 404 not found\n");
 						strcat(answer, "Connection: close\n\r");
@@ -356,8 +360,8 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontrases... </html>");
-						}else{
+						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontraras... </html>");
+					}else{
 						strcat(answer,"HTTP/1.1 200 OK\n");
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: 0");//Debemos dar un index html para put y delete!
@@ -382,7 +386,7 @@ int main(int argc, char *argv[]){
 					strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
 					strcat(answer, "<html> <title>  Error 505 </title>\n<h1> Error 505: Version De HTTP no soportada. </h1> </html>");
 				}	
-			}else if(strcmp(method,"OPTIONS")==0 || strcmp(method,"POST")==0 || strcmp("TRACE")==0 || strcmp(method,"CONNECT")==0){
+			}else if(strcmp(method,"OPTIONS")==0 || strcmp(method,"POST")==0 || strcmp(method,"TRACE")==0 || strcmp(method,"CONNECT")==0){
 				strcpy(answer, "HTTP/1.1 400 bad request\n");
 				strcat(answer, "Connection: close\n\r");
 				strcat(answer, "Content-Length: 93");
