@@ -175,6 +175,8 @@ int main(int argc, char *argv[]){
 		 
 			if(strcmp(method, "GET")==0){
 				strcat(document_root, route);
+				//printf("%s\n",document_root);
+				     //printf("%s\n",route);
 				     //printf("%s\n",version);
 				if(strcmp(version,"HTTP/1.1")>=0){
 					asset=fopen(document_root, "r");					
