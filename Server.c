@@ -21,9 +21,7 @@ void finalizar (int senyal){
 
 int main(int argc, char *argv[]){
 	char *port_server="6000";
-	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
-	directoryIndex="/Index.html";
-	directoryIndex=malloc(1024);
+	char *split, *directoryIndex; 
 	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
@@ -31,9 +29,7 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in server_addr, client_addr;
 	char answer[1024], mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
 	FILE *conf_file, *asset;
-	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
-	document_root="/home/jose/Escritorio/Servidor";
-	document_root=malloc(1024);
+	char *document_root; 
 	int size;
 	time_t tiempo;
 	struct tm *tmPtr; 
@@ -41,6 +37,10 @@ int main(int argc, char *argv[]){
 	char tamanyo[100];
 	char *document;
 	
+	document_root=malloc(1024);
+	document_root="/home/jose/Escritorio/Servidor";
+	directoryIndex=malloc(1024);
+	directoryIndex="/Indez.html";
 	if(argc>1){
 	  if(strcmp(argv[1], "-c")==0){
 	    conf_file=fopen(argv[2], "r");
@@ -191,8 +191,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-						/*Cabeceras*/
-						strcat(answer, "\n\r"); //Es necesario?
+						strcat(answer, "\n\r"); 
 						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontraras... </html>");
 					}
 					else{				 
@@ -208,7 +207,7 @@ int main(int argc, char *argv[]){
 						fclose(asset);
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: ");
-						strcat(answer,tamanyo); /*No se si funcionará el casteo*/
+						strcat(answer,tamanyo);
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
