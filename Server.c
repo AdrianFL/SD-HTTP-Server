@@ -38,9 +38,9 @@ int main(int argc, char *argv[]){
 	char *document;
 	
 	document_root=malloc(1024);
-	document_root="/home/jose/Escritorio/Servidor";
+	strcpy(document_root, "/home/jose/Escritorio/Servidor");
 	directoryIndex=malloc(1024);
-	directoryIndex="/Indez.html";
+	strcpy(directoryIndex, "/Index.html");
 	if(argc>1){
 	  if(strcmp(argv[1], "-c")==0){
 	    conf_file=fopen(argv[2], "r");
