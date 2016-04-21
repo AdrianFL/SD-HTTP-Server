@@ -38,9 +38,9 @@ int main(int argc, char *argv[]){
 	char *document;
 	
 	document_root=malloc(1024);
-	strcpy(document_root, "/home/jose/Escritorio/Servidor");
+	strcpy(document_root,"/home/adrian/Programacion/SD-HTTP-Server");
 	directoryIndex=malloc(1024);
-	strcpy(directoryIndex, "/Index.html");
+	strcpy(directoryIndex,"/Index.html");
 	if(argc>1){
 	  if(strcmp(argv[1], "-c")==0){
 	    conf_file=fopen(argv[2], "r");
@@ -175,9 +175,6 @@ int main(int argc, char *argv[]){
 		 
 			if(strcmp(method, "GET")==0){
 				strcat(document_root, route);
-				//printf("%s\n",document_root);
-				     //printf("%s\n",route);
-				     //printf("%s\n",version);
 				if(strcmp(version,"HTTP/1.1")>=0){
 					asset=fopen(document_root, "r");					
 					if(asset==NULL){
@@ -220,6 +217,7 @@ int main(int argc, char *argv[]){
 						if(document){
 						  strcat(answer,document);
 						}
+						printf("%s", answer);
 						strcat(answer, "\n\r");
 						
 					}
