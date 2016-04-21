@@ -217,7 +217,6 @@ int main(int argc, char *argv[]){
 						if(document){
 						  strcat(answer,document);
 						}
-						printf("%s", answer);
 						strcat(answer, "\n\r");
 						
 					}
