@@ -21,9 +21,7 @@ void finalizar (int senyal){
 
 int main(int argc, char *argv[]){
 	char *port_server="6000";
-	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
-	//directoryIndex="/Index.html";
-	//directoryIndex=malloc(1024);
+	char *split, *directoryIndex;
 	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
@@ -31,13 +29,7 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in server_addr, client_addr;
 	char answer[1024], mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
 	FILE *conf_file, *asset;
-	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
-	//document_root="/home/jose/Escritorio/Servidor";
-	//document_root=malloc(1024);
-	document_root=malloc(1024);
-	strcpy(document_root,"/home/jose/Escritorio/Servidor");
-	directoryIndex=malloc(1024);
-	strcpy(directoryIndex,"/Index.html");
+	char *document_root;
 	int size;
 	time_t tiempo;
 	struct tm *tmPtr; 
@@ -45,6 +37,10 @@ int main(int argc, char *argv[]){
 	char tamanyo[100];
 	char *document;
 	
+	document_root=malloc(1024);
+	strcpy(document_root,"/home/jose/Escritorio/Servidor");
+	directoryIndex=malloc(1024);
+	strcpy(directoryIndex,"/Index.html");
 	if(argc>1){
 	  if(strcmp(argv[1], "-c")==0){
 	    conf_file=fopen(argv[2], "r");
@@ -90,10 +86,6 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	printf("Socket abierto\n\r");
-	//printf("%s\n",document_root);
-	//printf("%d\n",max_clients);
-	//printf("%s\n",port_server);
-	//printf("%s\n",directoryIndex);
 	
 	/**** Paso 2: Establecer la dirección (puerto) de escucha ****/
 	
@@ -106,9 +98,6 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	printf("Puerto de escucha establecido\n\r");
-	
-	//printf("%s\n",document_root);
-	//printf("%s\n",directoryIndex);
 	
 	/**** Paso 3: Preparar el servidor para escuchar ****/
 
@@ -169,7 +158,7 @@ int main(int argc, char *argv[]){
 			close(s2);
 			exit(0); /* el hijo ya no tiene que hacer nada */			}
 			mensaje[recibidos] = '\0'; /* pongo el final de cadena */
-			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); /*Para que mostramos esta linea?*/
+			printf("Mensaje [%d]: %s\n\r", recibidos, mensaje); 
 			method=strtok(mensaje, " "); /* Comprobamos el metodo HTTP*/
 			route=strtok(NULL, " ");
 			version=strtok(NULL," ");
@@ -181,7 +170,6 @@ int main(int argc, char *argv[]){
 				strcat(document_root, route);
 				printf("%s\n",document_root);
 				     printf("%s\n",route);
-				     //printf("%s\n",version);
 				if(strcmp(version,"HTTP/1.1")>=0){
 					asset=fopen(document_root, "r");					
 					if(asset==NULL){
@@ -195,8 +183,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
-						/*Cabeceras*/
-						strcat(answer, "\n\r"); //Es necesario?
+						strcat(answer, "\n\r"); 
 						strcat(answer, "<html> <title> Error 404</title>\n<h1> Error 404: Archivo no encontrado en el servidor  </h1> \n O a lo mejor no queriamos que lo encontraras... </html>");
 					}
 					else{				 
@@ -212,7 +199,7 @@ int main(int argc, char *argv[]){
 						fclose(asset);
 						strcat(answer, "Connection: close\n\r");
 						strcat(answer, "Content-Length: ");
-						strcat(answer,tamanyo); /*No se si funcionará el casteo*/
+						strcat(answer,tamanyo);
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
@@ -374,7 +361,7 @@ int main(int argc, char *argv[]){
 					}else{
 						strcat(answer,"HTTP/1.1 200 OK\n");
 						strcat(answer, "Connection: close\n\r");
-						strcat(answer, "Content-Length: 0");//Debemos dar un index html para put y delete!
+						strcat(answer, "Content-Length: 0");
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
