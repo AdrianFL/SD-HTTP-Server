@@ -22,8 +22,8 @@ void finalizar (int senyal){
 int main(int argc, char *argv[]){
 	char *port_server="6000";
 	char *split, *directoryIndex; /*Debe indicar directoryIndex un documento por defecto ya presente en el servidor? Como tratamos errores*/
-	directoryIndex="/Index.html";
-	directoryIndex=malloc(1024);
+	//directoryIndex="/Index.html";
+	//directoryIndex=malloc(1024);
 	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
@@ -32,8 +32,12 @@ int main(int argc, char *argv[]){
 	char answer[1024], mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
 	FILE *conf_file, *asset;
 	char *document_root; /*Esto es un puntero? O deberia ser un array?*/
-	document_root="/home/jose/Escritorio/Servidor";
+	//document_root="/home/jose/Escritorio/Servidor";
+	//document_root=malloc(1024);
 	document_root=malloc(1024);
+	strcpy(document_root,"/home/jose/Escritorio/Servidor");
+	directoryIndex=malloc(1024);
+	strcpy(directoryIndex,"/Index.html");
 	int size;
 	time_t tiempo;
 	struct tm *tmPtr; 
@@ -175,8 +179,8 @@ int main(int argc, char *argv[]){
 		 
 			if(strcmp(method, "GET")==0){
 				strcat(document_root, route);
-				//printf("%s\n",document_root);
-				     //printf("%s\n",route);
+				printf("%s\n",document_root);
+				     printf("%s\n",route);
 				     //printf("%s\n",version);
 				if(strcmp(version,"HTTP/1.1")>=0){
 					asset=fopen(document_root, "r");					
