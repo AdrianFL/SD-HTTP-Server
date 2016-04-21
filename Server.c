@@ -22,12 +22,12 @@ void finalizar (int senyal){
 int main(int argc, char *argv[]){
 	char *port_server="6000";
 	char *split, *directoryIndex; 
-	char *method, *route, *version, *answer;
+	char *method, *route, *version;
 	char c;
 	int i, s2, proceso, n, recibidos, max_clients=4, enviados;
 	unsigned int long_client_addr;
 	struct sockaddr_in server_addr, client_addr;
-	char mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
+	char answer[1024], mensaje[1024],parameter[800], parameter1[800], parameter2[800], parameter3[800];
 	FILE *conf_file, *asset;
 	char *document_root; 
 	int size;
@@ -41,8 +41,6 @@ int main(int argc, char *argv[]){
 	strcpy(document_root,"/home/adrian/Programacion/SD-HTTP-Server");
 	directoryIndex=malloc(1024);
 	strcpy(directoryIndex,"/Index.html");
-	answer=malloc(1024);
-	strcpy(answer, "");
 	if(argc>1){
 	  if(strcmp(argv[1], "-c")==0){
 	    conf_file=fopen(argv[2], "r");
@@ -88,6 +86,10 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	printf("Socket abierto\n\r");
+	//printf("%s\n",document_root);
+	//printf("%d\n",max_clients);
+	//printf("%s\n",port_server);
+	//printf("%s\n",directoryIndex);
 	
 	/**** Paso 2: Establecer la dirección (puerto) de escucha ****/
 	
@@ -100,6 +102,9 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	printf("Puerto de escucha establecido\n\r");
+	
+	//printf("%s\n",document_root);
+	//printf("%s\n",directoryIndex);
 	
 	/**** Paso 3: Preparar el servidor para escuchar ****/
 
@@ -203,7 +208,7 @@ int main(int argc, char *argv[]){
 						strcat(answer, "\n\r");
 						strcat(answer, "Content-Type: txt/html\n\r");
 						strcat(answer, "Server: Servidor SD\n\r");
-						strcat(, "Date: ");
+						strcat(answer, "Date: ");
 						strcat(answer, date);
 						strcat(answer, "\n\r");
 						strcat(answer, "Cache-control: max-age=0, no-cache\n\r");
